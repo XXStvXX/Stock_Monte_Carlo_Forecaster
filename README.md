@@ -1,42 +1,34 @@
 # Stock Monte Carlo Forecaster
 
-A Python-based quantitative tool for simulating stock price trajectories using Geometric Brownian Motion (GBM). This application fetches real-time market data to model return distributions and project potential future outcomes via Monte Carlo simulations.
+A quantitative tool for simulating S&P 500 (VFV.TO) price trajectories using Geometric Brownian Motion (GBM).
+
+## The Story Behind This Project
+
+During the Fall 2025 semester at UTSC, I found myself immersed in the theoretical frameworks of **MGEB11 (Quantitative Methods in Economics)** and **STAB53 (Introduction to Applied Statistics)**. Concepts like confidence intervals, quantiles, and stochastic processes were no longer just textbook formulas—they felt like tools that could decode market uncertainty.
+
+In the world of finance, using AI to predict exact stock prices is often seen as "pseudiscience." I was drawn to the **Monte Carlo Method** because it doesn't offer a single "guess," but rather a probabilistic range of outcomes. I realized that by calculating the **5th and 95th quantiles** and visualizing the **expected mean** with shaded confidence regions, I could create a clear, statistically-grounded forecast range.
+
+To bring this to life, I revisited the Python fundamentals I learned in **CSCA08 (Introduction to Computer Science)** during my first semester. I developed the core back-end logic and then collaborated with **Gemini** to bridge the gap into front-end engineering. Through this partnership, I learned to navigate Streamlit and Plotly, eventually building the framework for the interactive app you see today.
 
 ## Technical Implementation
 
-### Core Model
-The simulation is built on the Geometric Brownian Motion (GBM) stochastic process:
+### Core Methodology
+The simulation utilizes **Geometric Brownian Motion (GBM)**:
 $$dS_t = \mu S_t dt + \sigma S_t dW_t$$
 
-The engine extracts historical drift ($\mu$) and volatility ($\sigma$) to generate 500+ independent random walks, providing a probabilistic outlook rather than a deterministic price target.
+By extracting historical drift ($\mu$) and volatility ($\sigma$) from real-time YFinance data, the model generates 500+ random walks to quantify uncertainty rather than predicting a deterministic price.
 
 ### Key Functionalities
-- **Live Data Ingestion:** Automated pipeline using `yfinance` API with multi-index handling.
-- **Statistical Analysis:** Interactive return density plots overlaid with theoretical Gaussian curves to identify empirical fat-tails.
-- **Risk Assessment:** Dynamic calculation of 95% Confidence Intervals and Value-at-Risk (VaR).
-- **Macro Sensitivity:** Integrated drift adjustment parameters to simulate forward-looking economic scenarios.
+- **Live Data Pipeline:** Handles complex multi-index structures from `yfinance`.
+- **Dynamic Analysis:** Interactive return density plots with magnetic spikelines for granular inspection of "Fat Tails."
+- **Risk Metrics:** Real-time calculation of Value-at-Risk (VaR) and probabilistic forecasting horizons.
+- **Macro Integration:** A 'Macro Bias' slider allows for stress-testing historical data against forward-looking economic expectations.
 
-## Development Iterations & Debugging
-
-The project evolved through several technical challenges:
-
-**Data Pipeline Robustness**
-Initially, the app faced `KeyError` issues due to yfinance's multi-level column headers. The logic was refactored to flatten index structures, ensuring stable data flow for complex tickers like `VFV.TO`.
-
-**Interactive Visualization**
-Static Matplotlib plots were replaced with Plotly to enable precise data inspection. By configuring `spikemode` and `spikesnap`, the dashboard now allows for granular analysis of return densities at the 4th decimal place.
-
-**Error Handling**
-To handle API edge cases (e.g., weekends or invalid tickers), defensive programming was implemented to catch empty DataFrames and `IndexError` exceptions, replacing raw tracebacks with clean user notifications.
-
-**Model Integration**
-The standard GBM model was extended to include a 'Macro Bias' slider, bridging the gap between historical statistical drift and subjective macro-economic forecasting.
-
-## Stack
-- Python (NumPy, Pandas, SciPy)
-- Plotly (Visualization)
-- Streamlit (Deployment)
+## Tech Stack
+- **Languages:** Python (NumPy, Pandas, SciPy)
+- **Frameworks:** Streamlit, Plotly
+- **Infrastructure:** Streamlit Cloud
 
 ---
-Developed by XXStvXX, *UTSC 28', 
-Major in Statistics & Economics | Minor in English-Chinese Translation*
+**Author:** XXStvXX (UTSC 2028)
+*Major in Statistics & Economics | Minor in English-Chinese Translation*
