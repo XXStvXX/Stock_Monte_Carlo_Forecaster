@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 # --- 1. 网页配置 ---
 st.set_page_config(page_title="Quant Analysis Lab", layout="wide")
 
-# 标题与署名 (去除表情，专业风格)
+# 标题与署名
 st.title("Quantitative Finance & Market Prediction Lab")
 st.markdown("""
 <style>
