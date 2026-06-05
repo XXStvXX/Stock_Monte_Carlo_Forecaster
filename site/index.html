@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stock Monte Carlo Forecaster</title>
+    <meta
+      name="description"
+      content="A Monte Carlo forecasting and risk analysis project for stock price scenarios."
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #132325;
+        --muted: #536466;
+        --paper: #f7f5ef;
+        --panel: #ffffff;
+        --green: #2f6f73;
+        --red: #b23a48;
+        --gold: #a77f32;
+        --line: #d8d2c4;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .shell {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+      }
+
+      header,
+      main,
+      footer {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px 0;
+      }
+
+      .brand {
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      nav {
+        display: flex;
+        gap: 14px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      nav a {
+        text-decoration: none;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+        gap: 32px;
+        align-items: center;
+        padding: 48px 0 36px;
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 780px;
+        font-size: clamp(42px, 7vw, 86px);
+        line-height: 0.96;
+        letter-spacing: 0;
+      }
+
+      .lede {
+        margin: 24px 0 0;
+        max-width: 640px;
+        color: var(--muted);
+        font-size: 19px;
+        line-height: 1.6;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 30px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 18px;
+        border: 1px solid var(--ink);
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 700;
+      }
+
+      .button.primary {
+        background: var(--ink);
+        color: white;
+      }
+
+      .terminal {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #0f1d1f;
+        color: #eaf3ef;
+        overflow: hidden;
+        box-shadow: 0 22px 70px rgba(19, 35, 37, 0.16);
+      }
+
+      .terminal-bar {
+        display: flex;
+        gap: 6px;
+        padding: 13px 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--red);
+      }
+
+      .dot:nth-child(2) {
+        background: var(--gold);
+      }
+
+      .dot:nth-child(3) {
+        background: var(--green);
+      }
+
+      pre {
+        margin: 0;
+        padding: 22px;
+        overflow: auto;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        padding: 26px 0 58px;
+      }
+
+      .card {
+        min-height: 178px;
+        padding: 20px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+      }
+
+      .card strong {
+        display: block;
+        margin-bottom: 12px;
+        font-size: 16px;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      footer {
+        padding: 26px 0 34px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 860px) {
+        header {
+          align-items: flex-start;
+          gap: 16px;
+          flex-direction: column;
+        }
+
+        .hero,
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          padding-top: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <div class="brand">Stock Monte Carlo Forecaster</div>
+        <nav aria-label="Project links">
+          <a href="https://github.com/XXStvXX/Stock_Monte_Carlo_Forecaster">GitHub</a>
+          <a href="https://github.com/XXStvXX/Stock_Monte_Carlo_Forecaster/blob/main/docs/MODEL_NOTES.md">Model notes</a>
+          <a href="https://github.com/XXStvXX/Stock_Monte_Carlo_Forecaster#command-line-usage">CLI</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="title">
+          <div>
+            <h1 id="title">Monte Carlo risk lab for market scenarios.</h1>
+            <p class="lede">
+              A Python and Streamlit project that simulates stock price paths, estimates downside risk,
+              and turns uncertainty into readable probability metrics.
+            </p>
+            <div class="actions">
+              <a class="button primary" href="https://github.com/XXStvXX/Stock_Monte_Carlo_Forecaster">View repository</a>
+              <a class="button" href="https://share.streamlit.io/deploy?repository=https://github.com/XXStvXX/Stock_Monte_Carlo_Forecaster">Deploy on Streamlit</a>
+            </div>
+          </div>
+
+          <div class="terminal" aria-label="Example command">
+            <div class="terminal-bar" aria-hidden="true">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+            <pre><code>pip install -e ".[dev]"
+streamlit run app.py
+
+stock-forecast VFV.TO \
+  --lookback-days 1095 \
+  --horizon-days 252 \
+  --paths 2000 \
+  --annual-macro-bias 0.02</code></pre>
+          </div>
+        </section>
+
+        <section class="grid" aria-label="Project highlights">
+          <article class="card">
+            <strong>GBM engine</strong>
+            <p>Reusable simulation module with reproducible seeds and positive log-return price paths.</p>
+          </article>
+          <article class="card">
+            <strong>Risk metrics</strong>
+            <p>VaR, CVaR, probability of loss, target-hit probability, and simulation intervals.</p>
+          </article>
+          <article class="card">
+            <strong>Interactive app</strong>
+            <p>Streamlit dashboard with ticker selection, macro bias, charts, and data inspection.</p>
+          </article>
+          <article class="card">
+            <strong>Engineering polish</strong>
+            <p>Package metadata, CLI, unit tests, CI workflow, model notes, and example config.</p>
+          </article>
+        </section>
+      </main>
+
+      <footer>
+        Built by XXStvXX. For education and research, not financial advice.
+      </footer>
+    </div>
+  </body>
+</html>
