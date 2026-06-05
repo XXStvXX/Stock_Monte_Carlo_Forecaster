@@ -2,7 +2,13 @@
 
 A quantitative finance project for simulating stock price paths, studying downside risk, and building scenario-based forecasts with Geometric Brownian Motion (GBM). The default example is `VFV.TO`, but the app works with any ticker supported by Yahoo Finance.
 
-This project started as an interactive Streamlit experiment and has been expanded into a small Python package with reusable modules, a CLI, tests, model notes, and GitHub Actions CI.
+This project started as an interactive Streamlit experiment and has been expanded into a small Python package with reusable modules, a CLI, tests, model notes, GitHub Actions CI, and a GitHub Pages project site.
+
+## Live Links
+
+- Project site: https://xxstvxx.github.io/Stock_Monte_Carlo_Forecaster/
+- Repository: https://github.com/XXStvXX/Stock_Monte_Carlo_Forecaster
+- Streamlit deploy shortcut: https://share.streamlit.io/deploy?repository=https://github.com/XXStvXX/Stock_Monte_Carlo_Forecaster
 
 ## What It Does
 
@@ -42,6 +48,7 @@ Example JSON scenario settings are available in [`examples/scenario_config.json`
 ```text
 .
 ├── app.py                         # Streamlit dashboard
+├── site/index.html                # GitHub Pages project site
 ├── stock_monte_carlo/
 │   ├── data.py                    # Yahoo Finance data loading and cleaning
 │   ├── simulation.py              # GBM Monte Carlo engine
@@ -51,7 +58,7 @@ Example JSON scenario settings are available in [`examples/scenario_config.json`
 ├── tests/                         # Unit tests for simulation and risk logic
 ├── docs/MODEL_NOTES.md            # Model assumptions and limitations
 ├── pyproject.toml                 # Package metadata and tool config
-└── .github/workflows/ci.yml       # Lint and test workflow
+└── .github/workflows/             # CI and Pages deployment workflows
 ```
 
 ## Methodology
