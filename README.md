@@ -6,9 +6,9 @@ This project started as an interactive Streamlit experiment and has been expande
 
 ## Live Links
 
+- Live Streamlit app: https://stockmontecarloforecaster-xxstvxx.streamlit.app/
 - Project site: https://xxstvxx.github.io/Stock_Monte_Carlo_Forecaster/
 - Repository: https://github.com/XXStvXX/Stock_Monte_Carlo_Forecaster
-- Streamlit deploy shortcut: https://share.streamlit.io/deploy?repository=https://github.com/XXStvXX/Stock_Monte_Carlo_Forecaster
 
 ## What It Does
 
