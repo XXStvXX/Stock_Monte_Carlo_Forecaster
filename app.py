@@ -1,165 +1,110 @@
+from __future__ import annotations
+
 import streamlit as st
-import yfinance as yf
-import pandas as pd
-import numpy as np
-import plotly.graph_objects as go
-from scipy.stats import norm
-from datetime import datetime, timedelta
 
-# --- 1. 网页配置 ---
-st.set_page_config(page_title="Quant Analysis Lab", layout="wide")
+from stock_monte_carlo import SimulationConfig, load_market_data, run_gbm_simulation, summarize_risk
+from stock_monte_carlo.plotting import returns_distribution_chart, simulation_chart
 
-# 标题与署名
-st.title("Quantitative Finance & Market Prediction Lab")
-st.markdown("""
-<style>
-.small-font {
-    font-size:14px !important;
-    color: #808080;
+
+LOOKBACK_OPTIONS = {
+    "3 months": 90,
+    "6 months": 180,
+    "1 year": 365,
+    "3 years": 365 * 3,
+    "5 years": 365 * 5,
+    "Max sample": 365 * 15,
 }
-</style>
-<p class="small-font">Developed by <a href="https://github.com/XXStvXX" target="_blank">XXStvXX</a></p>
-""", unsafe_allow_html=True)
-st.markdown("---")
 
-# --- 2. 侧边栏：参数设置 ---
-st.sidebar.header("Data Settings")
-ticker = st.sidebar.text_input("Stock Ticker:", "VFV.TO")
 
-# 时间跨度选择
-time_options = {
-    "1 Month": 30,
-    "3 Months": 90,
-    "6 Months": 180,
-    "1 Year": 365,
-    "3 Years": 365*3,
-    "5 Years": 365*5,
-    "Max (15Y)": 365*15
-}
-selected_period = st.sidebar.selectbox("Historical Time Scale:", list(time_options.keys()), index=3)
+st.set_page_config(page_title="Quant Research Lab", layout="wide")
+st.title("Quant Research Lab")
+st.caption("Monte Carlo forecasting, downside risk, and scenario analysis for liquid equity tickers.")
 
-st.sidebar.markdown("---")
-st.sidebar.header("Model Parameters")
-sim_days = st.sidebar.slider("Forecast Horizon (Days):", 30, 365, 252)
-num_sims = st.sidebar.slider("Number of Simulations:", 100, 1000, 500)
+with st.sidebar:
+    st.header("Market")
+    ticker = st.text_input("Ticker", "VFV.TO")
+    lookback_label = st.selectbox("Historical sample", list(LOOKBACK_OPTIONS), index=2)
 
-st.sidebar.subheader("Macro Scenario Analysis")
-macro_drift = st.sidebar.slider("Annual Macro Bias:", -0.2, 0.2, 0.0)
-
-# --- 3. 数据获取与处理 ---
-start_date = (datetime.now() - timedelta(days=time_options[selected_period])).strftime('%Y-%m-%d')
+    st.header("Simulation")
+    horizon_days = st.slider("Forecast horizon", 20, 504, 252, help="Trading days into the future.")
+    paths = st.slider("Simulation paths", 100, 5000, 1000, step=100)
+    annual_macro_bias = st.slider(
+        "Annual macro bias",
+        -0.30,
+        0.30,
+        0.0,
+        step=0.01,
+        format="%.2f",
+        help="Annualized drift adjustment used for stress testing.",
+    )
+    seed = st.number_input("Random seed", min_value=0, max_value=999999, value=42, step=1)
+    target_price = st.number_input("Optional target price", min_value=0.0, value=0.0, step=1.0)
 
 if ticker:
-    with st.spinner(f'Analyzing {selected_period} of {ticker} data...'):
-        # 获取历史数据
-        data = yf.download(ticker, start=start_date)
-        
-        # 兼容 yfinance 多级索引
-        if isinstance(data.columns, pd.MultiIndex):
-            prices = data['Close'][ticker]
-        else:
-            prices = data['Close']
-            
-        returns = prices.pct_change().dropna()
-        mu = returns.mean()
-        sigma = returns.std()
-        last_price = float(prices.iloc[-1].item())
+    try:
+        with st.spinner(f"Downloading and modelling {ticker.upper()}..."):
+            market = load_market_data(ticker, LOOKBACK_OPTIONS[lookback_label])
+            config = SimulationConfig(
+                horizon_days=horizon_days,
+                paths=paths,
+                annual_macro_bias=annual_macro_bias,
+                seed=int(seed),
+            )
+            result = run_gbm_simulation(
+                last_price=market.last_price,
+                daily_drift=market.daily_drift,
+                daily_volatility=market.daily_volatility,
+                config=config,
+            )
+            risk = summarize_risk(
+                market.last_price,
+                result.terminal_prices,
+                target_price=target_price if target_price > 0 else None,
+            )
+    except Exception as exc:  # Streamlit should surface data/provider issues clearly.
+        st.error(str(exc))
+        st.stop()
 
-    # --- 4. 历史收益率分布 (交互式磁吸版) ---
-    st.subheader(f"Historical Returns Analysis ({selected_period})")
-    
-    # 准备统计曲线
-    x_range = np.linspace(returns.min(), returns.max(), 100)
-    y_norm = norm.pdf(x_range, mu, sigma)
+    kpi_cols = st.columns(5)
+    kpi_cols[0].metric("Current", f"${risk.current_price:,.2f}")
+    kpi_cols[1].metric("Expected", f"${risk.expected_terminal_price:,.2f}", f"{risk.expected_return:.2%}")
+    kpi_cols[2].metric("Median", f"${risk.median_terminal_price:,.2f}")
+    kpi_cols[3].metric("VaR 95%", f"{risk.value_at_risk_95:.2%}", delta_color="inverse")
+    kpi_cols[4].metric("Prob. loss", f"{risk.probability_of_loss:.1%}", delta_color="inverse")
 
-    fig_hist = go.Figure()
-
-    # 蓝色柱状图 (块状)
-    fig_hist.add_trace(go.Histogram(
-        x=returns,
-        nbinsx=100,
-        name='Actual Returns',
-        marker_color='#2E86C1',
-        opacity=0.7,
-        histnorm='probability density'
-    ))
-
-    # 红色拟合曲线
-    fig_hist.add_trace(go.Scatter(
-        x=x_range, y=y_norm,
-        mode='lines',
-        name='Normal Dist',
-        line=dict(color='#E74C3C', width=2.5)
-    ))
-
-    # 配置磁吸感交互
-    fig_hist.update_layout(
-        template="simple_white",
-        hovermode="x unified",
-        xaxis=dict(
-            title="Daily Return (%)",
-            tickformat=".2%",
-            showspikes=True,
-            spikemode="across",
-            spikesnap="data",
-            spikethickness=1,
-            spikecolor="#999999",
-            spikedash="dash"
-        ),
-        yaxis=dict(title="Probability Density", showgrid=True, gridcolor='rgba(200, 200, 200, 0.3)'),
-        showlegend=False,
-        height=450,
-        margin=dict(l=20, r=20, t=20, b=20)
+    tab_forecast, tab_distribution, tab_risk, tab_data = st.tabs(
+        ["Forecast", "Return distribution", "Risk report", "Data"]
     )
-    st.plotly_chart(fig_hist, use_container_width=True)
 
-    st.markdown("---")
+    with tab_forecast:
+        st.plotly_chart(simulation_chart(result), use_container_width=True)
 
-    # --- 5. 蒙特卡洛预测 (全宽显示 + 置信区间) ---
-    st.subheader(f"Monte Carlo Projection ({num_sims} paths)")
-    
-    import matplotlib.pyplot as plt
-    
-    # 算法核心
-    sim_results = np.zeros((sim_days, num_sims))
-    daily_macro_adj = (mu + (macro_drift / 252))
-    
-    for i in range(num_sims):
-        random_returns = np.random.normal(daily_macro_adj, sigma, sim_days)
-        price_path = last_price * (1 + random_returns).cumprod()
-        sim_results[:, i] = price_path
-    
-    # 计算分位数
-    mean_path = sim_results.mean(axis=1)
-    lower_bound = np.percentile(sim_results, 5, axis=1)
-    upper_bound = np.percentile(sim_results, 95, axis=1)
+    with tab_distribution:
+        st.plotly_chart(returns_distribution_chart(market.returns), use_container_width=True)
 
-    # 绘图
-    fig_sim, ax_sim = plt.subplots(figsize=(12, 6))
-    ax_sim.plot(sim_results, color='#2E86C1', alpha=0.015) 
-    ax_sim.plot(mean_path, color='#C0392B', linewidth=2.5, label="Expected Mean")
-    ax_sim.plot(lower_bound, color='#212F3D', linestyle='--', linewidth=1, label="5th Percentile")
-    ax_sim.plot(upper_bound, color='#212F3D', linestyle='--', linewidth=1, label="95th Percentile")
-    
-    days_array = np.arange(sim_days)
-    ax_sim.fill_between(days_array, lower_bound, upper_bound, color='gray', alpha=0.25, label="90% CI")
+    with tab_risk:
+        left, right = st.columns(2)
+        with left:
+            st.subheader("Downside")
+            st.metric("5th percentile terminal price", f"${risk.downside_price_5:,.2f}")
+            st.metric("Conditional VaR 95%", f"{risk.conditional_value_at_risk_95:.2%}", delta_color="inverse")
+        with right:
+            st.subheader("Upside")
+            st.metric("95th percentile terminal price", f"${risk.upside_price_95:,.2f}")
+            if risk.probability_target_hit is not None:
+                st.metric("Probability target is hit", f"{risk.probability_target_hit:.1%}")
+            else:
+                st.info("Enter a target price in the sidebar to estimate hit probability.")
 
-    ax_sim.set_xlabel("Trading Days into Future")
-    ax_sim.set_ylabel("Price (Currency)")
-    ax_sim.set_title(f"Simulation of Future Price Action: {ticker}", fontweight='bold')
-    ax_sim.grid(True, linestyle='--', alpha=0.5)
-    ax_sim.legend(loc='upper left', fontsize='small')
-    
-    st.pyplot(fig_sim)
-
-    # --- 6. 底部量化指标卡片 ---
-    st.divider()
-    expected_val = float(mean_path[-1])
-    var_95 = float(np.percentile(sim_results[-1, :], 5))
-    
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Current Price", f"${last_price:.2f}")
-    c2.metric("Projected Mean", f"${expected_val:.2f}", f"{((expected_val/last_price)-1):.2%}")
-    c3.metric("95% Value-at-Risk", f"${var_95:.2f}", "Downside Limit", delta_color="inverse")
-
-    st.markdown("<p style='font-size:12px; color:gray; text-align:center;'>Model: Geometric Brownian Motion (GBM) with Monte Carlo Method. Parameters derived from historical volatility.</p>", unsafe_allow_html=True)
+    with tab_data:
+        st.write(
+            {
+                "ticker": market.ticker,
+                "sample_start": market.start_date,
+                "sample_end": market.end_date,
+                "observations": int(len(market.returns)),
+                "annualized_drift": f"{market.annualized_drift:.2%}",
+                "annualized_volatility": f"{market.annualized_volatility:.2%}",
+            }
+        )
+        st.dataframe(market.prices.rename("close").tail(30), use_container_width=True)
