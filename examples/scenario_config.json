@@ -1,0 +1,9 @@
+{
+  "ticker": "VFV.TO",
+  "lookback_days": 1095,
+  "horizon_days": 252,
+  "paths": 2000,
+  "annual_macro_bias": 0.02,
+  "seed": 42,
+  "target_price": 180.0
+}
