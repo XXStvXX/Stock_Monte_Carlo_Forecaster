@@ -1,34 +1,83 @@
 # Stock Monte Carlo Forecaster
 
-A quantitative tool for simulating S&P 500 (VFV.TO) price trajectories using Geometric Brownian Motion (GBM).
+A quantitative finance project for simulating stock price paths, studying downside risk, and building scenario-based forecasts with Geometric Brownian Motion (GBM). The default example is `VFV.TO`, but the app works with any ticker supported by Yahoo Finance.
 
-## The Story Behind This Project
+This project started as an interactive Streamlit experiment and has been expanded into a small Python package with reusable modules, a CLI, tests, model notes, and GitHub Actions CI.
 
-During the Fall 2025 semester at UTSC, I found myself immersed in the theoretical frameworks of **MGEB11 (Quantitative Methods in Economics)** and **STAB53 (Introduction to Applied Statistics)**. Concepts like confidence intervals, quantiles, and stochastic processes were no longer just textbook formulas—they felt like tools that could decode market uncertainty.
+## What It Does
 
-In the world of finance, using AI to predict exact stock prices is often seen as "pseudiscience." I was drawn to the **Monte Carlo Method** because it doesn't offer a single "guess," but rather a probabilistic range of outcomes. I realized that by calculating the **5th and 95th quantiles** and visualizing the **expected mean** with shaded confidence regions, I could create a clear, statistically-grounded forecast range.
+- Downloads historical close prices with `yfinance`.
+- Estimates daily drift and volatility from historical returns.
+- Runs thousands of GBM Monte Carlo paths with a reproducible random seed.
+- Lets the user apply an annualized macro bias for stress testing.
+- Reports expected return, median outcome, 5th/95th percentile prices, VaR, CVaR, probability of loss, and target-hit probability.
+- Visualizes both historical return distributions and future simulated price paths.
 
-To bring this to life, I revisited the Python fundamentals I learned in **CSCA08 (Introduction to Computer Science)** during my first semester. I developed the core back-end logic and then collaborated with **Gemini** to bridge the gap into front-end engineering. Through this partnership, I learned to navigate Streamlit and Plotly, eventually building the framework for the interactive app you see today.
+## App Preview
 
-## Technical Implementation
+Run the dashboard locally:
 
-### Core Methodology
-The simulation utilizes **Geometric Brownian Motion (GBM)**:
-$$dS_t = \mu S_t dt + \sigma S_t dW_t$$
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
 
-By extracting historical drift ($\mu$) and volatility ($\sigma$) from real-time YFinance data, the model generates 500+ random walks to quantify uncertainty rather than predicting a deterministic price.
+Or install the package in editable mode:
 
-### Key Functionalities
-- **Live Data Pipeline:** Handles complex multi-index structures from `yfinance`.
-- **Dynamic Analysis:** Interactive return density plots with magnetic spikelines for granular inspection of "Fat Tails."
-- **Risk Metrics:** Real-time calculation of Value-at-Risk (VaR) and probabilistic forecasting horizons.
-- **Macro Integration:** A 'Macro Bias' slider allows for stress-testing historical data against forward-looking economic expectations.
+```bash
+pip install -e ".[dev]"
+streamlit run app.py
+```
 
-## Tech Stack
-- **Languages:** Python (NumPy, Pandas, SciPy)
-- **Frameworks:** Streamlit, Plotly
-- **Infrastructure:** Streamlit Cloud
+## Command Line Usage
 
----
-**Author:** XXStvXX (UTSC 2028)
-*Major in Statistics & Economics | Minor in English-Chinese Translation*
+```bash
+stock-forecast VFV.TO --lookback-days 1095 --horizon-days 252 --paths 2000 --annual-macro-bias 0.02 --target-price 180
+```
+
+Example JSON scenario settings are available in [`examples/scenario_config.json`](examples/scenario_config.json).
+
+## Project Structure
+
+```text
+.
+├── app.py                         # Streamlit dashboard
+├── stock_monte_carlo/
+│   ├── data.py                    # Yahoo Finance data loading and cleaning
+│   ├── simulation.py              # GBM Monte Carlo engine
+│   ├── risk.py                    # VaR, CVaR, probability metrics
+│   ├── plotting.py                # Plotly chart builders
+│   └── cli.py                     # Command line interface
+├── tests/                         # Unit tests for simulation and risk logic
+├── docs/MODEL_NOTES.md            # Model assumptions and limitations
+├── pyproject.toml                 # Package metadata and tool config
+└── .github/workflows/ci.yml       # Lint and test workflow
+```
+
+## Methodology
+
+The model uses GBM log-return dynamics:
+
+```text
+S_t = S_0 * exp(cumsum((mu - 0.5 * sigma^2) + sigma * Z_t))
+```
+
+The goal is not to predict one exact future price. The goal is to estimate a distribution of possible future prices and make uncertainty visible through quantiles, tail-risk metrics, and scenario controls.
+
+## Tests
+
+```bash
+pytest -q
+ruff check .
+```
+
+The CI workflow runs tests on Python 3.10, 3.11, and 3.12.
+
+## Disclaimer
+
+This project is for education and research. It is not financial advice. GBM assumes stable volatility and normally distributed log returns, while real markets include regime changes, jumps, liquidity constraints, and macro shocks.
+
+## Author
+
+XXStvXX (UTSC 2028)  
+Major in Statistics & Economics | Minor in English-Chinese Translation
