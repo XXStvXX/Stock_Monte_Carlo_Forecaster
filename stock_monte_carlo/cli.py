@@ -10,7 +10,9 @@ from .simulation import SimulationConfig, run_gbm_simulation
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run a Monte Carlo forecast for a stock ticker.")
-    parser.add_argument("ticker", help="Ticker symbol accepted by Yahoo Finance, e.g. VFV.TO or SPY.")
+    parser.add_argument(
+        "ticker", help="Ticker symbol accepted by Yahoo Finance, e.g. VFV.TO or SPY."
+    )
     parser.add_argument("--lookback-days", type=int, default=365)
     parser.add_argument("--horizon-days", type=int, default=252)
     parser.add_argument("--paths", type=int, default=1000)
