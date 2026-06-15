@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import streamlit as st
 
-from stock_monte_carlo import SimulationConfig, load_market_data, run_gbm_simulation, summarize_risk
+from stock_monte_carlo import (
+    SimulationConfig,
+    load_market_data,
+    run_gbm_simulation,
+    summarize_risk,
+)
 from stock_monte_carlo.plotting import returns_distribution_chart, simulation_chart
 
 
@@ -18,7 +23,9 @@ LOOKBACK_OPTIONS = {
 
 st.set_page_config(page_title="Quant Research Lab", layout="wide")
 st.title("Quant Research Lab")
-st.caption("Monte Carlo forecasting, downside risk, and scenario analysis for liquid equity tickers.")
+st.caption(
+    "Monte Carlo forecasting, downside risk, and scenario analysis for liquid equity tickers."
+)
 
 with st.sidebar:
     st.header("Market")
@@ -67,7 +74,9 @@ if ticker:
 
     kpi_cols = st.columns(5)
     kpi_cols[0].metric("Current", f"${risk.current_price:,.2f}")
-    kpi_cols[1].metric("Expected", f"${risk.expected_terminal_price:,.2f}", f"{risk.expected_return:.2%}")
+    kpi_cols[1].metric(
+        "Expected", f"${risk.expected_terminal_price:,.2f}", f"{risk.expected_return:.2%}"
+    )
     kpi_cols[2].metric("Median", f"${risk.median_terminal_price:,.2f}")
     kpi_cols[3].metric("VaR 95%", f"{risk.value_at_risk_95:.2%}", delta_color="inverse")
     kpi_cols[4].metric("Prob. loss", f"{risk.probability_of_loss:.1%}", delta_color="inverse")
@@ -87,7 +96,11 @@ if ticker:
         with left:
             st.subheader("Downside")
             st.metric("5th percentile terminal price", f"${risk.downside_price_5:,.2f}")
-            st.metric("Conditional VaR 95%", f"{risk.conditional_value_at_risk_95:.2%}", delta_color="inverse")
+            st.metric(
+                "Conditional VaR 95%",
+                f"{risk.conditional_value_at_risk_95:.2%}",
+                delta_color="inverse",
+            )
         with right:
             st.subheader("Upside")
             st.metric("95th percentile terminal price", f"${risk.upside_price_95:,.2f}")
