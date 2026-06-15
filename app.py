@@ -10,7 +10,6 @@ from stock_monte_carlo import (
 )
 from stock_monte_carlo.plotting import returns_distribution_chart, simulation_chart
 
-
 LOOKBACK_OPTIONS = {
     "3 months": 90,
     "6 months": 180,
