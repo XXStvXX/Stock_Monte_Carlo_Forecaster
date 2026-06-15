@@ -7,6 +7,7 @@ name = "stock-monte-carlo-forecaster"
 version = "0.1.0"
 description = "Monte Carlo stock forecasting dashboard and risk toolkit."
 readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.10"
 authors = [{ name = "XXStvXX" }]
 dependencies = [
