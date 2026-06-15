@@ -57,7 +57,9 @@ def _close_column(data: pd.DataFrame, ticker: str) -> pd.Series:
     return prices
 
 
-def load_market_data(ticker: str, lookback_days: int = 365, end: datetime | None = None) -> MarketData:
+def load_market_data(
+    ticker: str, lookback_days: int = 365, end: datetime | None = None
+) -> MarketData:
     """Download historical prices and compute daily simple returns."""
 
     clean_ticker = ticker.strip().upper()
@@ -71,7 +73,9 @@ def load_market_data(ticker: str, lookback_days: int = 365, end: datetime | None
     start_date = start_dt.strftime("%Y-%m-%d")
     end_date = end_dt.strftime("%Y-%m-%d")
 
-    raw = yf.download(clean_ticker, start=start_date, end=end_date, auto_adjust=False, progress=False)
+    raw = yf.download(
+        clean_ticker, start=start_date, end=end_date, auto_adjust=False, progress=False
+    )
     prices = _close_column(raw, clean_ticker)
     returns = prices.pct_change().replace([np.inf, -np.inf], np.nan).dropna()
 
