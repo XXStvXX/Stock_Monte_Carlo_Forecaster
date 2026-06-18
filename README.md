@@ -19,6 +19,12 @@ This project started as an interactive Streamlit experiment and has been expande
 - Reports expected return, median outcome, 5th/95th percentile prices, VaR, CVaR, probability of loss, and target-hit probability.
 - Visualizes both historical return distributions and future simulated price paths.
 
+## AI-Assisted Workflow
+
+This project uses AI-assisted prototyping and documentation as part of a human-in-the-loop workflow. AI helped speed up iteration around package structure, documentation, test planning, and UI explanation, while model assumptions, risk interpretation, and final technical claims remain manually reviewed.
+
+See [`docs/AI_ASSISTED_WORKFLOW.md`](docs/AI_ASSISTED_WORKFLOW.md) for the workflow note.
+
 ## App Preview
 
 Run the dashboard locally:
